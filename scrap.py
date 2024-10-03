@@ -3,6 +3,7 @@ import requests
 import mysql.connector
 from playwright.sync_api import sync_playwright
 import json
+import uuid
 
 # For countries
 def scrape_data():
@@ -122,12 +123,15 @@ def scrapCountryArtist():
                         link = item.query_selector("a.image-wrapper").get_attribute("href")
                         
                         # Create directory if it doesn't exist
-                        directory = "images/profiles"
+                        directory = "images"
                         if not os.path.exists(directory):
                             os.makedirs(directory)
 
                         # Download and save the image
-                        image_name = os.path.join(directory, os.path.basename(image))
+                        unique_id = str(uuid.uuid4())
+                        image_extension = os.path.splitext(image)[1]  # Get the file extension
+                        image_name = os.path.join(directory, f"{unique_id}{image_extension}")
+
                         download_image(image, image_name)
 
                         data.append({
@@ -323,12 +327,15 @@ def scrap_artist_data():
                             year = ""
                         
                         # Create directory if it doesn't exist
-                        directory = "images/"+title
+                        directory = "images"
                         if not os.path.exists(directory):
                             os.makedirs(directory)
 
-                        # Download and save the image
-                        image_name = os.path.join(directory, os.path.basename(image))
+                         # Download and save the image
+                        unique_id = str(uuid.uuid4())
+                        image_extension = os.path.splitext(image)[1]  # Get the file extension
+                        image_name = os.path.join(directory, f"{unique_id}{image_extension}")
+
                         download_image(image, image_name)
 
                         artworks.append({
@@ -404,7 +411,7 @@ def get_image_link(title,link):
             break; 
 
         image_url = page.query_selector('img[itemprop="image"]').get_attribute("src")
-        local_directory = "images/"+title
+        local_directory = "images/"
         if not os.path.exists(local_directory):
             os.makedirs(local_directory)
             
@@ -545,14 +552,16 @@ def store_art_info():
                 break; 
 
             image_url = page.query_selector('img[itemprop="image"]').get_attribute("src")
-            local_directory = "images/"+title
+            local_directory = "images"
             if not os.path.exists(local_directory):
                 os.makedirs(local_directory)
                 
-            image_filename = os.path.join(local_directory, os.path.basename(image_url))
-            
-            # Download and save the image locally
-            download_image(image_url, image_filename)
+             # Download and save the image
+            unique_id = str(uuid.uuid4())
+            image_extension = os.path.splitext(image_url)[1]  # Get the file extension
+            image_name = os.path.join(local_directory, f"{unique_id}{image_extension}")
+
+            download_image(image_url, image_name)
             title = page.query_selector('article h3').inner_text()
             artist_name = page.query_selector('span[itemprop="name"]').inner_text() 
 
@@ -588,7 +597,7 @@ def store_art_info():
                 "max_resolution":max_resolution,
                 "tags":tags,
                 "art_id": art_id,
-                "image": image_filename
+                "image": image_name
             })
         browser.close()        
     return data
